@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Specify the path to the lock icon
+icon="lock-icon.png"
+
+# Specify the path to the font you want to use here. I use Droid Sans Bold.
+font="~/.local/share/fonts/DroidSans-Bold.ttf"
+
+# Expand is used to convert the tabs to spaces which are handled better by imageMagick
+fortune=$(expand -t 2 <(fortune -s))
+
+# Create a temporary image file in /tmp and randomize its name for privacy reasons
+scr=`mktemp --suffix '.png'`
+
+# Make a screenshot, save it in the temporary image file, and pixelize it
+scrot "$scr"
+mogrify -scale 10% -scale 1000% "$scr"
+
+# Find the main color of the pixelized screenshot
+backColor="$(convert -crop 1000x50+183+500 "$scr" -resize 1x1\! txt:- | grep 0,0: | grep -o "#.* " | tr -d "# ")"
+# Find the contrasting color to backColor, and use it as the color for the text
+textColor="$(printf %X $((0xFFFFFF - 0x$backColor)); echo)"
+
+# Add the lock icon and the text to the pixelized screenshot
+convert "$scr" "$icon" -gravity center -composite \
+	-gravity center -pointsize 20 -font $font \
+	-fill "#$textColor" -annotate +0+200 "$fortune" "$scr"
+
+# Lock the computer using i3lock, with the pixelized and modified screenshot as the lock screen
+# Then delete the image file as a safety measure, verify that the screen is locked, and turn off the screen
+i3lock --image "$scr" --ignore-empty-password --show-failed-attempts && rm -f "$scr" && pgrep i3lock && xset dpms force off
