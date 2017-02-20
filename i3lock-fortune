@@ -4,7 +4,7 @@
 icon="lock-icon.png"
 
 # Specify the path to the font you want to use here. I use Droid Sans Bold.
-font="~/.local/share/fonts/DroidSans-Bold.ttf"
+font="/home/$USER/.local/share/fonts/DroidSans-Bold.ttf"
 
 # Expand is used to convert the tabs to spaces which are handled better by imageMagick
 fortune=$(expand -t 2 <(fortune -s))
